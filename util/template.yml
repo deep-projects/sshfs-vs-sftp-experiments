@@ -21,7 +21,7 @@ container:
   engine: 'docker'
   settings:
     image:
-      url: 'alpine:3.11.3'
+      url: 'python:3.8'
     ram: 256
 
 execution:
