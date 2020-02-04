@@ -41,10 +41,10 @@ def main():
         stderr=subprocess.PIPE
     )  # type: subprocess.CompletedProcess
 
-    os.remove(TMP_FILE_NAME)
-
     result_data = yaml.load(execution_result.stdout)
     experiment_id = result_data['response']['experimentId']
+
+    print('experimentId: {}'.format(experiment_id), flush=True)
 
     agency = data['execution']['settings']['access']['url']
 
@@ -52,7 +52,7 @@ def main():
     print('waiting for the experiment to finish.', flush=True)
     run_while_working(agency, experiment_id, username, pw, verbose=True)
 
-    pprint(get_detailed_result(agency, experiment_id, username, pw))
+    pprint(get_detailed_result(agency, experiment_id, username, pw)['states'])
 
 
 if __name__ == '__main__':
