@@ -26,3 +26,7 @@ experimentId: 5e397850eeaf898b6e4b487c
 total time: 1114.13s
 mean scheduled duration: 47.70s
 mean processing duration: 7.14s
+
+
+# cp 10 5GB
+experimentId: 5e39a6453c1382a1004fbd4c
