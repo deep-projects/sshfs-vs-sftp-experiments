@@ -4,7 +4,12 @@
 import argparse
 import os.path
 import copy
-import yaml
+from ruamel.yaml import YAML, YAMLError
+
+JSON_INDENT = 4
+
+yaml = YAML(typ='safe')
+yaml.default_flow_style = False
 
 
 def get_arguments():
@@ -37,14 +42,14 @@ def dump_data(target_filename, data):
     with open(target_filename, 'w') as f:
         try:
             yaml.dump(data, f)
-        except Exception:
+        except YAMLError:
             print('could not dump')
 
 
 def load_data(infile):
     with open(infile, 'r') as f:
         try:
-            data = yaml.safe_load(f)
+            data = yaml.load(f)
         except Exception:
             raise IOError('could not load file')
     return data

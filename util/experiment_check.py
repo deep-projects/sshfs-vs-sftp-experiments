@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 
-import keyring
 import time
 import os.path
 import getpass
@@ -16,7 +15,7 @@ def get_arguments():
     parser = argparse.ArgumentParser(description='Prints status information about the given experiment')
 
     parser.add_argument('agency', type=str, help='The address of the agency')
-    parser.add_argument('experimentid', type=str, help='The experiment id')
+    parser.add_argument('experimentId', type=str, help='The experiment id')
 
     return parser.parse_args()
 
@@ -25,9 +24,11 @@ def get_username_pw():
     username = None
     pw = None
     try:
+        # noinspection PyUnresolvedReferences
         import keyring
         username = keyring.get_password('red', 'agency_username')
         pw = keyring.get_password('red', 'agency_password')
+        del keyring
     except ImportError:
         pass
 
@@ -45,7 +46,7 @@ def main():
 
     username, pw = get_username_pw()
 
-    result = run_while_working(args.agency, args.experimentid, username, pw)
+    run_while_working(args.agency, args.experimentid, username, pw)
 
     pprint(get_detailed_result(args.agency, args.experimentid, username, pw))
 
@@ -57,14 +58,15 @@ class BatchFetcher:
         self.password = password
 
     def __call__(self, batch):
-        result = requests.get(os.path.join(self.agency, 'batches', batch['_id']), auth=(self.username, self.password)).json()
+        result = requests.get(
+            os.path.join(self.agency, 'batches', batch['_id']),
+            auth=(self.username, self.password)
+        ).json()
         print('#', end='', flush=True)
         return result
 
 
 def fetch_batches(batches, agency, username, pw):
-    batch_list = []
-
     with Pool(5) as p:
         print('Fetching batches: [', end='', flush=True)
         batch_list = list(p.map(BatchFetcher(agency, username, pw), batches))
@@ -73,10 +75,10 @@ def fetch_batches(batches, agency, username, pw):
     return batch_list
 
 
-def get_batches(agency, username, pw, experimentid):
+def get_batches(agency, username, pw, experiment_id):
     resp = requests.get(os.path.join(agency, 'batches'), auth=(username, pw))
 
-    batches = list(filter(lambda b: b['experimentId'] == experimentid, resp.json()))
+    batches = list(filter(lambda b: b['experimentId'] == experiment_id, resp.json()))
 
     return batches
 
@@ -92,8 +94,8 @@ def check_finished(state_dict):
     return all(map(lambda k: k in ['succeeded', 'failed', 'cancelled'], state_dict.keys()))
 
 
-def get_detailed_result(agency, experimentid, username, pw):
-    batches = get_batches(agency, username, pw, experimentid)
+def get_detailed_result(agency, experiment_id, username, pw):
+    batches = get_batches(agency, username, pw, experiment_id)
 
     state_dict = get_state_dict(batches)
 
@@ -112,9 +114,9 @@ def get_detailed_result(agency, experimentid, username, pw):
     }
 
 
-def run_while_working(agency, experimentid, username, pw):
+def run_while_working(agency, experiment_id, username, pw):
     while True:
-        batches = get_batches(agency, username, pw, experimentid)
+        batches = get_batches(agency, username, pw, experiment_id)
         state_dict = get_state_dict(batches)
 
         if check_finished(state_dict):
