@@ -27,6 +27,7 @@ container:
 execution:
   engine: "ccagency"
   settings:
+    batchConcurrencyLimit: 10000000
     access:
       url: "https://agency.f4.htw-berlin.de/cctest"
       auth:

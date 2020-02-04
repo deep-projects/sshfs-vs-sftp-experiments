@@ -5,6 +5,8 @@ import time
 import os.path
 import getpass
 import argparse
+from pprint import pprint
+
 import requests
 from collections import defaultdict
 
@@ -44,11 +46,12 @@ def main():
 
     username, pw = get_username_pw()
 
-    run_while_working(args.agency, args.experiment, username, pw)
+    pprint(run_while_working(args.agency, args.experiment, username, pw))
 
 
 def get_batches(agency, username, pw, experiment_id):
-    resp = requests.get(os.path.join(agency, 'batches'), auth=(username, pw))
+    url = '{}?experimentId={}'.format(os.path.join(agency, 'batches'), experiment_id)
+    resp = requests.get(url, auth=(username, pw))
 
     batches = list(filter(lambda b: b['experimentId'] == experiment_id, resp.json()))
 
@@ -66,13 +69,16 @@ def check_finished(state_dict):
     return all(map(lambda k: k in ['succeeded', 'failed', 'cancelled'], state_dict.keys()))
 
 
-def run_while_working(agency, experiment_id, username, pw):
+def run_while_working(agency, experiment_id, username, pw, verbose=False):
     while True:
         batches = get_batches(agency, username, pw, experiment_id)
         state_dict = get_state_dict(batches)
 
         if check_finished(state_dict):
+            print(state_dict, flush=True)
             return state_dict
+        elif verbose:
+            print(state_dict, end='\r', flush=True)
 
         time.sleep(2)
 

@@ -6,8 +6,6 @@ import os.path
 import copy
 from ruamel.yaml import YAML, YAMLError
 
-JSON_INDENT = 4
-
 yaml = YAML(typ='safe')
 yaml.default_flow_style = False
 
@@ -27,15 +25,20 @@ def main():
     data = load_data(args.infile)
 
     # create new batches
-    first_batch = data['batches'][0]
+    multiply_batches(data, vars(args)['num-batches'])
+
+    target_filename = '{}_extended.yml'.format(os.path.splitext(args.infile)[0])
+    dump_data(target_filename, data)
+
+
+def multiply_batches(template_data, num_batches):
+    first_batch = template_data['batches'][0]
     new_batches = []
-    for i in range(vars(args)['num-batches']):
+    for i in range(num_batches):
         new_batch = copy.deepcopy(first_batch)
         new_batches.append(new_batch)
 
-    data['batches'] = new_batches
-    target_filename = '{}_extended.yml'.format(os.path.splitext(args.infile)[0])
-    dump_data(target_filename, data)
+    template_data['batches'] = new_batches
 
 
 def dump_data(target_filename, data):
@@ -50,7 +53,7 @@ def load_data(infile):
     with open(infile, 'r') as f:
         try:
             data = yaml.load(f)
-        except Exception:
+        except (YAMLError, IOError):
             raise IOError('could not load file')
     return data
 
