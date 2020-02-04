@@ -46,7 +46,7 @@ def main():
 
     username, pw = get_username_pw()
 
-    pprint(run_while_working(args.agency, args.experiment, username, pw))
+    run_while_working(args.agency, args.experiment, username, pw, verbose=True)
 
 
 def get_batches(agency, username, pw, experiment_id):
@@ -75,10 +75,11 @@ def run_while_working(agency, experiment_id, username, pw, verbose=False):
         state_dict = get_state_dict(batches)
 
         if check_finished(state_dict):
-            print(state_dict, flush=True)
+            if verbose:
+                print('{: <100}'.format(str(state_dict)), flush=True)
             return state_dict
         elif verbose:
-            print(state_dict, end='\r', flush=True)
+            print('{: <100}'.format(str(state_dict)), end='\r', flush=True)
 
         time.sleep(2)
 

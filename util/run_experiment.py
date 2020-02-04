@@ -52,7 +52,7 @@ def main():
     print('waiting for the experiment to finish.', flush=True)
     run_while_working(agency, experiment_id, username, pw, verbose=True)
 
-    pprint(get_detailed_result(agency, experiment_id, username, pw)['states'])
+    # pprint(get_detailed_result(agency, experiment_id, username, pw)['states'])
 
 
 if __name__ == '__main__':
