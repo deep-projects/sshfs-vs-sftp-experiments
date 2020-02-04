@@ -1,7 +1,8 @@
+import json
 import os
+from statistics import mean
 
 import requests
-from pprint import pprint
 from multiprocessing import Lock
 from multiprocessing.pool import ThreadPool
 
@@ -16,7 +17,46 @@ def main():
 
     username, pw = get_username_pw()
 
-    pprint(get_detailed_result(args.agency, args.experiment, username, pw))
+    detailed_result = get_detailed_result(args.agency, args.experiment, username, pw)
+    print('state dict: {}'.format(detailed_result['states']))
+    print('total time: {}'.format(detailed_result['totalTime']))
+
+    mean_scheduled_duration = mean(get_state_durations(detailed_result['batchHistories'], 'scheduled'))
+    mean_processing_duration = mean(get_state_durations(detailed_result['batchHistories'], 'processing'))
+    print('mean scheduled duration: {}'.format(mean_scheduled_duration))
+    print('mean processing duration: {}'.format(mean_processing_duration))
+
+
+def get_total_time(batch_list):
+    start_time = batch_list[0]['history'][0]['time']
+    end_time = start_time
+    for history in batch_list:
+        history_start_time = min(history['history'], key=lambda he: he['time'])['time']
+        if history_start_time < start_time:
+            start_time = history_start_time
+
+        history_end_time = max(history['history'], key=lambda he: he['time'])['time']
+        if history_end_time > end_time:
+            end_time = history_end_time
+
+    return end_time - start_time
+
+
+def get_state_durations(batch_list, state):
+    return list(map(lambda batch: get_state_duration(batch['history'], state), batch_list))
+
+
+def get_state_duration(history, state):
+    begin_time = None
+    for history_entry in history:
+        if state == history_entry['state']:
+            begin_time = history_entry['time']
+
+    if begin_time is None:
+        raise ValueError('Could not find time of state "{}"'.format(state))
+
+    next_time = min(filter(lambda he: he['time'] > begin_time, history), key=lambda he: he['time'])['time']
+    return next_time - begin_time
 
 
 def get_detailed_result(agency, experiment_id, username, pw):
@@ -24,7 +64,22 @@ def get_detailed_result(agency, experiment_id, username, pw):
 
     state_dict = get_state_dict(batches)
 
-    batch_list = fetch_batches(batches, agency, username, pw)
+    cache_filename = 'cache/{}.json'.format(experiment_id)
+    if os.path.isfile(cache_filename):
+        # read cache
+        print('reading batches from cache.', flush=True)
+        with open(cache_filename, 'r') as cache_file:
+            batch_list = json.load(cache_file)
+    else:
+        batch_list = fetch_batches(batches, agency, username, pw)
+
+        # create cache
+        if not os.path.isdir('cache'):
+            os.mkdir('cache')
+
+        with open(cache_filename, 'w') as cache_file:
+            json.dump(batch_list, cache_file)
+
     batch_histories = []
     for batch in batch_list:
         if batch['history']:
@@ -35,7 +90,8 @@ def get_detailed_result(agency, experiment_id, username, pw):
 
     return {
         'states': state_dict,
-        'batchHistories': batch_histories
+        'batchHistories': batch_histories,
+        'totalTime': get_total_time(batch_list)
     }
 
 
@@ -58,8 +114,14 @@ class BatchFetcher:
 
         percentage = self.counter / self.num_batches
 
+        format_string = 'fetching batches: [{{:<{}}}/{{:<{}}}][{{:-<{}}}]'.format(
+            len(str(self.num_batches)),
+            len(str(self.num_batches)),
+            BAR_WIDTH
+        )
+
         print(
-            'fetching batches: [{:-<70}]'.format('#' * int(percentage * BAR_WIDTH)),
+            format_string.format(self.counter, self.num_batches, '#' * int(percentage * BAR_WIDTH)),
             end='\n' if self.counter == self.num_batches else '\r',
             flush=True
         )
