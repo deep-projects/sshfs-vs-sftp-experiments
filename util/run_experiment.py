@@ -36,7 +36,7 @@ def main():
     dump_data(TMP_FILE_NAME, data)
 
     execution_result = subprocess.run(
-        ['faice', 'exec', 'tmp_file', '--debug', '--disable-retry'],
+        ['faice', 'exec', TMP_FILE_NAME, '--debug', '--disable-retry'],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )  # type: subprocess.CompletedProcess
