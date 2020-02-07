@@ -28,8 +28,22 @@ mean scheduled duration: 47.70s
 mean processing duration: 7.14s
 
 
+# cp 1 5GB
+experimentId: 5e3d440d422ca7d7b849ce8e
+total time: 139.67461562156677
+mean scheduled duration: 1.7643589973449707
+mean processing duration: 137.7822253704071
+
 # cp 10 5GB
-experimentId: 5e39a6453c1382a1004fbd4c
-total time: 184.05s
-mean scheduled duration: 1.49s
-mean processing duration: 154.54s
+experimentId: 5e3d48d87dd16bb7aba7d9b2
+total time: 155.1197600364685
+mean scheduled duration: 1.671527886390686
+mean processing duration: 123.37211210727692
+
+
+# sshfs 100 5GB
+experimentId: 5e3d82cea167621fb065be20
+state dict: {'succeeded': 86, 'failed': 14}
+total time: 226.8509738445282
+mean scheduled duration: 4.132258248329163
+mean processing duration: 178.58692141771317

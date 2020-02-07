@@ -7,26 +7,29 @@ cli:
 
   inputs:
     infile:
-      type: 'File'
+      type: 'string'
       inputBinding:
         position: 1
+    indir:
+      type: 'Directory'
+      inputBinding:
+        position: 2
   outputs: {}
 
 batches:
   - inputs:
-      infile:
-        class: 'File'
+      infile: 'infile5G.bin'
+      indir:
+        class: 'Directory'
         connector:
           command: "red-connector-ssh"
+          mount: True
           access:
             host: "avocado01.f4.htw-berlin.de"
-            filePath: "/home/users/bschilling/test_data/infile5G.bin"
+            dirPath: "/home/users/bschilling/test_data"
             auth:
               username: '{{htw_username}}'
               password: '{{htw_password}}'
-            bannerTimeout: 240
-            timeout: 240
-            authTimeout: 240
     outputs: {}
 
 container:

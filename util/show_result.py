@@ -89,6 +89,7 @@ def get_detailed_result(agency, experiment_id, username, pw):
             batch_histories.append({'history': batch_history, 'node': batch['node']})
 
     return {
+        'experimentId': experiment_id,
         'states': state_dict,
         'batchHistories': batch_histories,
         'totalTime': get_total_time(batch_list)
