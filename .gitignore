@@ -3,3 +3,4 @@ __pycache__
 /util/cache
 /util/plot.pdf
 /util/tmp_file
+/util/executed_experiments

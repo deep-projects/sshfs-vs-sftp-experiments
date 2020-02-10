@@ -24,12 +24,7 @@ def get_arguments():
     return parser.parse_args()
 
 
-def main():
-    args = get_arguments()
-
-    data = load_data(args.template)
-    multiply_batches(data, vars(args)['num-batches'])
-
+def execute_experiment(data):
     dump_data(TMP_FILE_NAME, data)
 
     execution_result = subprocess.run(
@@ -38,8 +33,16 @@ def main():
         stderr=subprocess.PIPE
     )  # type: subprocess.CompletedProcess
 
-    result_data = yaml.load(execution_result.stdout)
-    experiment_id = result_data['response']['experimentId']
+    return yaml.load(execution_result.stdout)['response']['experimentId']
+
+
+def main():
+    args = get_arguments()
+
+    data = load_data(args.template)
+    multiply_batches(data, vars(args)['num-batches'])
+
+    experiment_id = execute_experiment(data)
 
     print('experimentId: {}'.format(experiment_id), flush=True)
 
