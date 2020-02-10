@@ -5,7 +5,6 @@ import time
 import os.path
 import getpass
 import argparse
-from pprint import pprint
 
 import requests
 from collections import defaultdict

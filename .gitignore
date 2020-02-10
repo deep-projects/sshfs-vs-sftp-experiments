@@ -1,3 +1,5 @@
 /.idea
 __pycache__
 /util/cache
+/util/plot.pdf
+/util/tmp_file

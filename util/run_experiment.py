@@ -1,13 +1,10 @@
-import os
 import argparse
 import subprocess
-from pprint import pprint
 
 from ruamel.yaml import YAML
 
 from batch_multiplier import multiply_batches, load_data, dump_data
 from experiment_check import run_while_working, get_username_pw
-from show_result import get_detailed_result
 
 yaml = YAML(typ='safe')
 yaml.default_flow_style = False
@@ -49,10 +46,7 @@ def main():
     agency = data['execution']['settings']['access']['url']
 
     username, pw = get_username_pw()
-    print('waiting for the experiment to finish.', flush=True)
     run_while_working(agency, experiment_id, username, pw, verbose=True)
-
-    # pprint(get_detailed_result(agency, experiment_id, username, pw)['states'])
 
 
 if __name__ == '__main__':

@@ -67,7 +67,7 @@ def get_detailed_result(agency, experiment_id, username, pw):
     cache_filename = 'cache/{}.json'.format(experiment_id)
     if os.path.isfile(cache_filename):
         # read cache
-        print('reading batches from cache.', flush=True)
+        print('reading {} from cache'.format(experiment_id), flush=True)
         with open(cache_filename, 'r') as cache_file:
             batch_list = json.load(cache_file)
     else:
@@ -81,7 +81,11 @@ def get_detailed_result(agency, experiment_id, username, pw):
             json.dump(batch_list, cache_file)
 
     batch_histories = []
+    mount = False
     for batch in batch_list:
+        if 'mount' in batch:
+            mount = batch['mount']
+
         if batch['history']:
             batch_history = []
             for history_entry in batch['history']:
@@ -92,7 +96,8 @@ def get_detailed_result(agency, experiment_id, username, pw):
         'experimentId': experiment_id,
         'states': state_dict,
         'batchHistories': batch_histories,
-        'totalTime': get_total_time(batch_list)
+        'totalTime': get_total_time(batch_list),
+        'mount': mount
     }
 
 
