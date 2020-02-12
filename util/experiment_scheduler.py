@@ -50,7 +50,7 @@ def dump_experiment_info(experiment_id, concurrency_limit, template, iteration_i
         'iterationIndex': iteration_index
     }
 
-    dump_path = os.path.join(EXECUTED_EXPERIMENTS_DIR, experiment_id + '.json')
+    dump_path = os.path.join(EXECUTED_EXPERIMENTS_DIR, experiment_id + '.yml')
 
     dump_data(dump_path, info_data)
 
