@@ -10,6 +10,7 @@ from experiment_check import get_batches, get_state_dict, get_username_pw, get_a
 
 
 BAR_WIDTH = 70
+CACHE_DIRECTORY = 'cache'
 
 
 def main():
@@ -17,7 +18,7 @@ def main():
 
     username, pw = get_username_pw()
 
-    detailed_result = get_detailed_result(args.agency, args.experiment, username, pw)
+    detailed_result = get_detailed_result_with_cache(args.agency, args.experiment, username, pw)
     print('state dict: {}'.format(detailed_result['states']))
     print('total time: {}'.format(detailed_result['totalTime']))
 
@@ -42,8 +43,19 @@ def get_total_time(batch_list):
     return end_time - start_time
 
 
+class BatchToStateDuration:
+    def __init__(self, state):
+        self.state = state
+
+    def __call__(self, batch):
+        try:
+            return get_state_duration(batch['history'], self.state)
+        except ValueError:
+            raise ValueError('Could not find time of state "{}"\nbatch: {}'.format(self.state, batch))
+
+
 def get_state_durations(batch_list, state):
-    return list(map(lambda batch: get_state_duration(batch['history'], state), batch_list))
+    return list(map(BatchToStateDuration(state), batch_list))
 
 
 def get_state_duration(history, state):
@@ -59,19 +71,45 @@ def get_state_duration(history, state):
     return next_time - begin_time
 
 
+def get_num_concurrent_batches(agency, experiment_id, username, pw):
+    url = agency + '/experiments/' + experiment_id
+    resp = requests.get(url, auth=(username, pw))
+
+    return resp.json()['execution']['settings']['batchConcurrencyLimit']
+
+
+def get_detailed_result_with_cache(agency, experiment_id, username, pw):
+    if not os.path.isdir(CACHE_DIRECTORY):
+        os.mkdir(CACHE_DIRECTORY)
+
+    cache_filename = os.path.join(CACHE_DIRECTORY, 'result_{}.json'.format(experiment_id))
+    if os.path.isfile(cache_filename):
+        with open(cache_filename, 'r') as cache_file:
+            return json.load(cache_file)
+    else:
+        detailed_result = get_detailed_result(agency, experiment_id, username, pw)
+
+        with open(cache_filename, 'w') as cache_file:
+            json.dump(detailed_result, cache_file)
+
+        return detailed_result
+
+
 def get_detailed_result(agency, experiment_id, username, pw):
     batches = get_batches(agency, username, pw, experiment_id)
 
+    num_concurrent_batches = get_num_concurrent_batches(agency, experiment_id, username, pw)
+
     state_dict = get_state_dict(batches)
 
-    cache_filename = 'cache/{}.json'.format(experiment_id)
+    cache_filename = '{}/{}.json'.format(CACHE_DIRECTORY, experiment_id)
     if os.path.isfile(cache_filename):
         # read cache
         print('reading {} from cache'.format(experiment_id), flush=True)
         with open(cache_filename, 'r') as cache_file:
             batch_list = json.load(cache_file)
     else:
-        batch_list = fetch_batches(batches, agency, username, pw)
+        batch_list = fetch_batches(batches, agency, username, pw, experiment_id)
 
         # create cache
         if not os.path.isdir('cache'):
@@ -81,10 +119,13 @@ def get_detailed_result(agency, experiment_id, username, pw):
             json.dump(batch_list, cache_file)
 
     batch_histories = []
+    batch_states = []
     mount = False
     for batch in batch_list:
         if 'mount' in batch:
             mount = batch['mount']
+
+        batch_states.append(batch['state'])
 
         if batch['history']:
             batch_history = []
@@ -95,20 +136,23 @@ def get_detailed_result(agency, experiment_id, username, pw):
     return {
         'experimentId': experiment_id,
         'states': state_dict,
+        'batchStates': batch_states,
         'batchHistories': batch_histories,
         'totalTime': get_total_time(batch_list),
-        'mount': mount
+        'mount': mount,
+        'numConcurrentBatches': num_concurrent_batches
     }
 
 
 class BatchFetcher:
-    def __init__(self, agency, username, password, num_batches):
+    def __init__(self, agency, username, password, num_batches, experiment_id=None):
         self.agency = agency
         self.username = username
         self.password = password
         self.num_batches = num_batches
         self.lock = Lock()
         self.counter = 0
+        self.experiment_id = experiment_id
 
     def __call__(self, batch):
         result = requests.get(
@@ -120,7 +164,8 @@ class BatchFetcher:
 
         percentage = self.counter / self.num_batches
 
-        format_string = 'fetching batches: [{{:<{}}}/{{:<{}}}][{{:-<{}}}]'.format(
+        format_string = 'fetching {}: [{{:<{}}}/{{:<{}}}][{{:-<{}}}]'.format(
+            self.experiment_id or 'batches',
             len(str(self.num_batches)),
             len(str(self.num_batches)),
             BAR_WIDTH
@@ -134,9 +179,9 @@ class BatchFetcher:
         return result
 
 
-def fetch_batches(batches, agency, username, pw):
+def fetch_batches(batches, agency, username, pw, experiment_id=None):
     with ThreadPool(5) as p:
-        batch_list = list(p.map(BatchFetcher(agency, username, pw, len(batches)), batches))
+        batch_list = list(p.map(BatchFetcher(agency, username, pw, len(batches), experiment_id), batches))
 
     return batch_list
 
