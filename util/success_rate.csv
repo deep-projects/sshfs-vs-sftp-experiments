@@ -1,0 +1,13 @@
+,number of failures,transfer method,number of concurrent batches,numBatches,failures in %
+0,0,sftp,10,600,0.0
+1,1,sftp,15,600,0.16666666666666669
+2,0,sshfs,10,500,0.0
+3,0,sshfs,5,500,0.0
+4,0,sftp,5,600,0.0
+5,0,sshfs,15,500,0.0
+6,0,sshfs,1,500,0.0
+7,45,sftp,25,600,7.5
+8,0,sshfs,25,500,0.0
+9,2,sftp,20,600,0.33333333333333337
+10,0,sftp,1,600,0.0
+11,0,sshfs,20,500,0.0

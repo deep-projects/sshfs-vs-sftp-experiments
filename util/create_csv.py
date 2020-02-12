@@ -2,9 +2,9 @@ import argparse
 import os
 from collections import defaultdict
 
-import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from experiment_check import get_username_pw
 from experiment_scheduler import EXECUTED_EXPERIMENTS_DIR
@@ -16,6 +16,9 @@ SCHEDULING_DURATION_LABEL = 'scheduling duration in seconds'
 NUM_FAILURES_LABEL = 'number of failures'
 FAIL_PERCENTAGE_LABEL = 'failures in %'
 MOUNT_LABEL = 'transfer method'
+
+PROCESSING_DURATION_CSV_PATH = 'processing_durations.csv'
+SUCCESS_RATE_CSV_PATH = 'success_rate.csv'
 
 
 def get_arguments():
@@ -115,10 +118,17 @@ def main():
         detailed_results[experiment_id] = get_detailed_result_with_cache(args.agency, experiment_id, username, pw)
 
     processing_time_df = detailed_results_to_data_frame(detailed_results)
+    succeeded_processing_times_df = processing_time_df[processing_time_df.states == 'succeeded']
+
     success_rate_df = detailed_results_to_success_rate_data_frame(detailed_results)
 
-    succeeded_df = processing_time_df[processing_time_df.states == 'succeeded']
+    succeeded_processing_times_df.to_csv(PROCESSING_DURATION_CSV_PATH)
+    success_rate_df.to_csv(SUCCESS_RATE_CSV_PATH)
 
+    plot_data_frames(succeeded_processing_times_df, success_rate_df)
+
+
+def plot_data_frames(duration_data_frame, success_rate_data_frame):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 4))
 
     sns.set(style="ticks", palette="pastel")
@@ -127,7 +137,7 @@ def main():
         y=PROCESSING_DURATION_LABEL,
         hue=MOUNT_LABEL,
         palette=['m', 'g'],
-        data=succeeded_df,
+        data=duration_data_frame,
         ax=ax1
     )
     sns.barplot(
@@ -135,7 +145,7 @@ def main():
         y=FAIL_PERCENTAGE_LABEL,
         hue=MOUNT_LABEL,
         palette=['m', 'g'],
-        data=success_rate_df,
+        data=success_rate_data_frame,
         ax=ax2
     )
     fig.savefig('plot.pdf', bibox_inches='tight')
