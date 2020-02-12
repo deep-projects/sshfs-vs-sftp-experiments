@@ -17,10 +17,6 @@ NUM_FAILURES_LABEL = 'number of failures'
 FAIL_PERCENTAGE_LABEL = 'failures in %'
 MOUNT_LABEL = 'transfer method'
 
-STATE = 'processing'
-
-EXPERIMENT_IDS = []
-
 
 def get_arguments():
     parser = argparse.ArgumentParser(description='Plots the data given by experiment ids')
@@ -118,10 +114,10 @@ def main():
     for experiment_id in get_experiment_ids_from_executed_experiments():
         detailed_results[experiment_id] = get_detailed_result_with_cache(args.agency, experiment_id, username, pw)
 
-    df = detailed_results_to_data_frame(detailed_results)
+    processing_time_df = detailed_results_to_data_frame(detailed_results)
     success_rate_df = detailed_results_to_success_rate_data_frame(detailed_results)
 
-    succeeded_df = df[df.states == 'succeeded']
+    succeeded_df = processing_time_df[processing_time_df.states == 'succeeded']
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 4))
 
