@@ -4,7 +4,9 @@ from create_csv import PROCESSING_DURATION_CSV_PATH, SUCCESS_RATE_CSV_PATH, plot
 
 
 def get_data_frames():
-    return pd.read_csv(PROCESSING_DURATION_CSV_PATH, index_col=0), pd.read_csv(SUCCESS_RATE_CSV_PATH, index_col=0)
+    processing_time_df = pd.read_csv(PROCESSING_DURATION_CSV_PATH, index_col=0)
+    successful_processing_time_df = processing_time_df[processing_time_df.states == 'succeeded']
+    return successful_processing_time_df, pd.read_csv(SUCCESS_RATE_CSV_PATH, index_col=0)
 
 
 def main():

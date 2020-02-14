@@ -109,6 +109,11 @@ def get_experiment_ids_from_executed_experiments():
     return experiment_ids
 
 
+def show_status_information(processing_time_df):
+    failed_df = processing_time_df[processing_time_df.states == 'failed']
+    print(failed_df[NUM_CONCURRENT_BATCHES_LABEL].value_counts())
+
+
 def main():
     args = get_arguments()
     username, pw = get_username_pw()
@@ -122,21 +127,23 @@ def main():
 
     success_rate_df = detailed_results_to_success_rate_data_frame(detailed_results)
 
-    succeeded_processing_times_df.to_csv(PROCESSING_DURATION_CSV_PATH)
+    processing_time_df.to_csv(PROCESSING_DURATION_CSV_PATH)
     success_rate_df.to_csv(SUCCESS_RATE_CSV_PATH)
 
     plot_data_frames(succeeded_processing_times_df, success_rate_df)
+
+    show_status_information(processing_time_df)
 
 
 def plot_data_frames(duration_data_frame, success_rate_data_frame):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 4))
 
-    sns.set(style="ticks", palette="pastel")
+    sns.set(style="ticks", palette="deep")
     sns.boxplot(
         x=NUM_CONCURRENT_BATCHES_LABEL,
         y=PROCESSING_DURATION_LABEL,
         hue=MOUNT_LABEL,
-        palette=['m', 'g'],
+        palette='deep',
         data=duration_data_frame,
         ax=ax1
     )
@@ -144,7 +151,7 @@ def plot_data_frames(duration_data_frame, success_rate_data_frame):
         x=NUM_CONCURRENT_BATCHES_LABEL,
         y=FAIL_PERCENTAGE_LABEL,
         hue=MOUNT_LABEL,
-        palette=['m', 'g'],
+        palette='deep',
         data=success_rate_data_frame,
         ax=ax2
     )
