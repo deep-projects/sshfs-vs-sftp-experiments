@@ -50,7 +50,7 @@ This will start a series of experiments that will copy 60 TB in total and can ta
 To speed up the process the number of experiments can be decreased.
 
 ```bash
-python3 ./src/experiment_scheduler.py --iterations=2 --batches-per-experiment=10 --number-concurrent-batches=1,5,10
+python3 ./src/experiment_scheduler.py --iterations=2 --batches-per-experiment=10 --number-concurrent-batches 1 5 10
 
 # python3 ./src/experiment_scheduler.py --help  for more information
 ```

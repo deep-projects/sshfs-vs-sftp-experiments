@@ -20,7 +20,7 @@ batches:
           command: "red-connector-ssh"
           access:
             host: ""
-            filePath: "~/test_data/infile.bin"
+            filePath: "test_data/infile.bin"
             auth:
               username: ''
               password: ''

@@ -62,8 +62,9 @@ def main():
 
     for iteration_index in range(args.iterations):
         for template in EXPERIMENT_TEMPLATES:
+            template_path = os.path.join('experiment_templates', template)
             run_template(
-                template, agency_auth_info, ssh_auth_info, iteration_index, args.batches_per_experiment,
+                template_path, agency_auth_info, ssh_auth_info, iteration_index, args.batches_per_experiment,
                 args.number_concurrent_batches
             )
 
@@ -73,9 +74,14 @@ def set_authentication_info(data, agency_auth_info, ssh_auth_info):
     data['execution']['settings']['access']['auth']['username'] = agency_auth_info.username
     data['execution']['settings']['access']['auth']['password'] = agency_auth_info.password
 
-    data['batches'][0]['inputs']['infile']['connector']['access']['host'] = ssh_auth_info.hostname
-    data['batches'][0]['inputs']['infile']['connector']['access']['auth']['username'] = ssh_auth_info.username
-    data['batches'][0]['inputs']['infile']['connector']['access']['auth']['password'] = ssh_auth_info.password
+    if 'indir' in data['batches'][0]['inputs']:
+        data['batches'][0]['inputs']['indir']['connector']['access']['host'] = ssh_auth_info.hostname
+        data['batches'][0]['inputs']['indir']['connector']['access']['auth']['username'] = ssh_auth_info.username
+        data['batches'][0]['inputs']['indir']['connector']['access']['auth']['password'] = ssh_auth_info.password
+    else:
+        data['batches'][0]['inputs']['infile']['connector']['access']['host'] = ssh_auth_info.hostname
+        data['batches'][0]['inputs']['infile']['connector']['access']['auth']['username'] = ssh_auth_info.username
+        data['batches'][0]['inputs']['infile']['connector']['access']['auth']['password'] = ssh_auth_info.password
 
 
 def run_template(template_name, agency_auth_info, ssh_auth_info, iteration_index, num_batches, num_concurrent_batches):
@@ -84,7 +90,7 @@ def run_template(template_name, agency_auth_info, ssh_auth_info, iteration_index
     # create new batches
     data_copy = copy.deepcopy(data)
 
-    set_authentication_info(data, agency_auth_info, ssh_auth_info)
+    set_authentication_info(data_copy, agency_auth_info, ssh_auth_info)
 
     multiply_batches(data_copy, num_batches)
 

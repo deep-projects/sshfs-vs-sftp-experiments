@@ -1,6 +1,6 @@
 pandas
 matplotlib
-faice==1.5
+cc-faice==9.0.1
 requests==2.22.0
 ruamel.yaml==0.16.7
 seaborn==0.10.0

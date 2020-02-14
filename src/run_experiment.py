@@ -1,4 +1,5 @@
 import argparse
+import json
 import subprocess
 import tempfile
 
@@ -40,7 +41,11 @@ def execute_experiment(data):
             stderr=subprocess.PIPE
         )  # type: subprocess.CompletedProcess
 
-    return yaml.load(execution_result.stdout)['response']['experimentId']
+    try:
+        return yaml.load(execution_result.stdout)['response']['experimentId']
+    except Exception as e:
+        print('failed to execute experiment. faice stdout: {}'.format(execution_result.stdout))
+        raise e
 
 
 def main():

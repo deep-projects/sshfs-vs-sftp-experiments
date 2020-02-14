@@ -26,7 +26,7 @@ batches:
           mount: True
           access:
             host: "avocado01.f4.htw-berlin.de"
-            dirPath: "~/test_data"
+            dirPath: "test_data"
             auth:
               username: '{{htw_username}}'
               password: '{{htw_password}}'

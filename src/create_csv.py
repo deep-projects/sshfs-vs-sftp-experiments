@@ -108,6 +108,9 @@ def show_status_information(processing_time_df):
 def main():
     agency_auth_info = AuthenticationInfo.from_user_input('agency')
 
+    if not os.path.isdir('results'):
+        os.mkdir('results')
+
     detailed_results = {}
     for experiment_id in get_experiment_ids_from_executed_experiments():
         detailed_results[experiment_id] = get_detailed_result_with_cache(
