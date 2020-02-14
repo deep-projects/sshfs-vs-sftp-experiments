@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from experiment_check import get_username_pw
-from experiment_scheduler import EXECUTED_EXPERIMENTS_DIR
+from experiment_scheduler import EXECUTED_EXPERIMENTS_DIR, AuthenticationInfo
 from show_result import get_state_durations, get_detailed_result_with_cache
 
 NUM_CONCURRENT_BATCHES_LABEL = 'number of concurrent batches'
@@ -17,17 +17,9 @@ NUM_FAILURES_LABEL = 'number of failures'
 FAIL_PERCENTAGE_LABEL = 'failures in %'
 MOUNT_LABEL = 'transfer method'
 
-CSVS_PATH = 'results'
-PROCESSING_DURATION_CSV_PATH = os.path.join(CSVS_PATH, 'processing_durations.csv')
-SUCCESS_RATE_CSV_PATH = os.path.join(CSVS_PATH, 'success_rate.csv')
-
-
-def get_arguments():
-    parser = argparse.ArgumentParser(description='Plots the data given by experiment ids')
-
-    parser.add_argument('agency', type=str, help='The address of the agency')
-
-    return parser.parse_args()
+RESULTS_PATH = 'results'
+PROCESSING_DURATION_CSV_PATH = os.path.join(RESULTS_PATH, 'processing_durations.csv')
+SUCCESS_RATE_CSV_PATH = os.path.join(RESULTS_PATH, 'success_rate.csv')
 
 
 def mount_to_transfer_method(mount):
@@ -116,12 +108,13 @@ def show_status_information(processing_time_df):
 
 
 def main():
-    args = get_arguments()
-    username, pw = get_username_pw()
+    agency_auth_info = AuthenticationInfo.from_user_input('agency')
 
     detailed_results = {}
     for experiment_id in get_experiment_ids_from_executed_experiments():
-        detailed_results[experiment_id] = get_detailed_result_with_cache(args.agency, experiment_id, username, pw)
+        detailed_results[experiment_id] = get_detailed_result_with_cache(
+            agency_auth_info.hostname, experiment_id, agency_auth_info.username, agency_auth_info.password
+        )
 
     processing_time_df = detailed_results_to_data_frame(detailed_results)
     succeeded_processing_times_df = processing_time_df[processing_time_df.states == 'succeeded']
@@ -131,9 +124,9 @@ def main():
     processing_time_df.to_csv(PROCESSING_DURATION_CSV_PATH)
     success_rate_df.to_csv(SUCCESS_RATE_CSV_PATH)
 
-    plot_data_frames(succeeded_processing_times_df, success_rate_df)
+    # plot_data_frames(succeeded_processing_times_df, success_rate_df)
 
-    show_status_information(processing_time_df)
+    # show_status_information(processing_time_df)
 
 
 def plot_data_frames(duration_data_frame, success_rate_data_frame):
@@ -156,7 +149,8 @@ def plot_data_frames(duration_data_frame, success_rate_data_frame):
         data=success_rate_data_frame,
         ax=ax2
     )
-    fig.savefig('plot.pdf', bibox_inches='tight')
+    plot_path = os.path.join(RESULTS_PATH, 'processing_times.pdf')
+    fig.savefig(plot_path, bibox_inches='tight')
 
 
 if __name__ == '__main__':

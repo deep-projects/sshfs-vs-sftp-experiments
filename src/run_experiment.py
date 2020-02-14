@@ -1,9 +1,10 @@
 import argparse
 import subprocess
+import tempfile
 
-from ruamel.yaml import YAML
+from ruamel.yaml import YAML, YAMLError
 
-from batch_multiplier import multiply_batches, load_data, dump_data
+from batch_multiplier import multiply_batches, load_data
 from experiment_check import run_while_working, get_username_pw
 
 yaml = YAML(typ='safe')
@@ -25,13 +26,19 @@ def get_arguments():
 
 
 def execute_experiment(data):
-    dump_data(TMP_FILE_NAME, data)
+    with tempfile.NamedTemporaryFile(mode='w+b') as execution_file:
+        try:
+            yaml.dump(data, execution_file)
+        except YAMLError:
+            print('could not dump')
 
-    execution_result = subprocess.run(
-        ['faice', 'exec', TMP_FILE_NAME, '--debug', '--disable-retry'],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )  # type: subprocess.CompletedProcess
+        execution_file.flush()
+
+        execution_result = subprocess.run(
+            ['faice', 'exec', execution_file.name, '--debug', '--disable-retry'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )  # type: subprocess.CompletedProcess
 
     return yaml.load(execution_result.stdout)['response']['experimentId']
 

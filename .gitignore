@@ -1,6 +1,5 @@
 /.idea
 __pycache__
 /cache
-/plot.pdf
 /tmp_file
 /executed_experiments

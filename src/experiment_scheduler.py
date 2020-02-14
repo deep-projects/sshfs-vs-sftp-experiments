@@ -1,39 +1,95 @@
 import copy
 import os
+from getpass import getpass
+import argparse
 
-from batch_multiplier import load_data, multiply_batches, dump_data
-from experiment_check import get_username_pw, run_while_working
+from batch_multiplier import load_data, multiply_batches, dump_yaml
+from experiment_check import run_while_working
 from run_experiment import execute_experiment
 
 
 EXECUTED_EXPERIMENTS_DIR = 'executed_experiments'
 
-BATCH_CONCURRENCY_LIMITS = [1, 5, 10, 15, 20, 25]
-BATCHES_PER_EXPERIMENT = 100
-NUM_ITERATIONS = 10
+DEFAULT_BATCH_CONCURRENCY_LIMITS = [1, 5, 10, 15, 20, 25]
+DEFAULT_BATCHES_PER_EXPERIMENT = 100
+DEFAULT_NUM_ITERATIONS = 10
 EXPERIMENT_TEMPLATES = ['sftp_template.red', 'sshfs_template.red']
 
 
+class AuthenticationInfo:
+    def __init__(self, hostname, username, password):
+        self.hostname = hostname
+        self.username = username
+        self.password = password
+
+    @staticmethod
+    def from_user_input(prompt_string):
+        hostname = input('{} hostname: '.format(prompt_string))
+        username = input('{} username: '.format(prompt_string))
+        password = getpass('{} password: '.format(prompt_string))
+
+        return AuthenticationInfo(hostname, username, password)
+
+
+def get_arguments():
+    parser = argparse.ArgumentParser(description='Executes several experiments with different configurations.')
+
+    parser.add_argument(
+        '--iterations', type=int, default=DEFAULT_NUM_ITERATIONS,
+        help='How often to repeat the whole process.'
+    )
+    parser.add_argument(
+        '--batches-per-experiment', type=int, default=DEFAULT_BATCHES_PER_EXPERIMENT,
+        help='The number of batches to execute for every experiment.'
+    )
+    parser.add_argument(
+        '--number-concurrent-batches', type=int, nargs='+', default=DEFAULT_BATCH_CONCURRENCY_LIMITS,
+        help='Comma separated list of integers defining different configurations how many batches should be executed '
+             'concurrently'
+    )
+
+    return parser.parse_args()
+
+
 def main():
-    username, pw = get_username_pw()
+    args = get_arguments()
+
+    agency_auth_info = AuthenticationInfo.from_user_input('agency')
+    ssh_auth_info = AuthenticationInfo.from_user_input('ssh')
 
     if not os.path.isdir(EXECUTED_EXPERIMENTS_DIR):
         os.mkdir(EXECUTED_EXPERIMENTS_DIR)
 
-    for iteration_index in range(NUM_ITERATIONS):
+    for iteration_index in range(args.iterations):
         for template in EXPERIMENT_TEMPLATES:
-            run_template(template, username, pw, iteration_index)
+            run_template(
+                template, agency_auth_info, ssh_auth_info, iteration_index, args.batches_per_experiment,
+                args.number_concurrent_batches
+            )
 
 
-def run_template(template_name, username, pw, iteration_index):
+def set_authentication_info(data, agency_auth_info, ssh_auth_info):
+    data['execution']['settings']['access']['url'] = agency_auth_info.hostname
+    data['execution']['settings']['access']['auth']['username'] = agency_auth_info.username
+    data['execution']['settings']['access']['auth']['password'] = agency_auth_info.password
+
+    data['batches'][0]['inputs']['infile']['connector']['access']['host'] = ssh_auth_info.hostname
+    data['batches'][0]['inputs']['infile']['connector']['access']['auth']['username'] = ssh_auth_info.username
+    data['batches'][0]['inputs']['infile']['connector']['access']['auth']['password'] = ssh_auth_info.password
+
+
+def run_template(template_name, agency_auth_info, ssh_auth_info, iteration_index, num_batches, num_concurrent_batches):
     data = load_data(template_name)
 
     # create new batches
     data_copy = copy.deepcopy(data)
-    multiply_batches(data_copy, BATCHES_PER_EXPERIMENT)
 
-    for concurrency_limit in BATCH_CONCURRENCY_LIMITS:
-        run_concurrency_limit(concurrency_limit, data_copy, username, pw, template_name, iteration_index)
+    set_authentication_info(data, agency_auth_info, ssh_auth_info)
+
+    multiply_batches(data_copy, num_batches)
+
+    for concurrency_limit in num_concurrent_batches:
+        run_concurrency_limit(concurrency_limit, data_copy, agency_auth_info, template_name, iteration_index)
 
 
 def dump_experiment_info(experiment_id, concurrency_limit, template, iteration_index):
@@ -43,6 +99,7 @@ def dump_experiment_info(experiment_id, concurrency_limit, template, iteration_i
         template,
         concurrency_limit,
     ))
+
     info_data = {
         'experimentId': experiment_id,
         'concurrencyLimit': concurrency_limit,
@@ -52,18 +109,19 @@ def dump_experiment_info(experiment_id, concurrency_limit, template, iteration_i
 
     dump_path = os.path.join(EXECUTED_EXPERIMENTS_DIR, experiment_id + '.yml')
 
-    dump_data(dump_path, info_data)
+    dump_yaml(dump_path, info_data)
 
 
-def run_concurrency_limit(concurrency_limit, data, username, pw, template, iteration_index):
+def run_concurrency_limit(concurrency_limit, data, agency_auth_info, template, iteration_index):
     set_batch_concurrency_limit(data, concurrency_limit)
 
     experiment_id = execute_experiment(data)
 
     dump_experiment_info(experiment_id, concurrency_limit, template, iteration_index)
 
-    agency = data['execution']['settings']['access']['url']
-    run_while_working(agency, experiment_id, username, pw, verbose=True)
+    run_while_working(
+        agency_auth_info.hostname, experiment_id, agency_auth_info.username, agency_auth_info.password, verbose=True
+    )
 
 
 def set_batch_concurrency_limit(batch_data, concurrency_limit):

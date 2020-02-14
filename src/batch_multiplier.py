@@ -28,7 +28,7 @@ def main():
     multiply_batches(data, vars(args)['num-batches'])
 
     target_filename = '{}_extended.yml'.format(os.path.splitext(args.infile)[0])
-    dump_data(target_filename, data)
+    dump_yaml(target_filename, data)
 
 
 def multiply_batches(template_data, num_batches):
@@ -41,7 +41,7 @@ def multiply_batches(template_data, num_batches):
     template_data['batches'] = new_batches
 
 
-def dump_data(target_filename, data):
+def dump_yaml(target_filename, data):
     with open(target_filename, 'w') as f:
         try:
             yaml.dump(data, f)

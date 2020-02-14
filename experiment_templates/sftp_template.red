@@ -19,11 +19,11 @@ batches:
         connector:
           command: "red-connector-ssh"
           access:
-            host: "avocado01.f4.htw-berlin.de"
-            filePath: "/home/users/bschilling/test_data/infile5G.bin"
+            host: ""
+            filePath: "~/test_data/infile.bin"
             auth:
-              username: '{{htw_username}}'
-              password: '{{htw_password}}'
+              username: ''
+              password: ''
             bannerTimeout: 240
             timeout: 240
             authTimeout: 240
@@ -41,7 +41,7 @@ execution:
   settings:
     batchConcurrencyLimit: 10000000
     access:
-      url: "https://agency.f4.htw-berlin.de/cctest"
+      url: ""
       auth:
-        username: "{{cc_test_agency_username}}"
-        password: "{{cc_test_agency_password}}"
+        username: ""
+        password: ""

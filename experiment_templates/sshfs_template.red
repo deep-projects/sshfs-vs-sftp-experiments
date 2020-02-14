@@ -18,7 +18,7 @@ cli:
 
 batches:
   - inputs:
-      infile: 'infile5G.bin'
+      infile: 'infile.bin'
       indir:
         class: 'Directory'
         connector:
@@ -26,7 +26,7 @@ batches:
           mount: True
           access:
             host: "avocado01.f4.htw-berlin.de"
-            dirPath: "/home/users/bschilling/test_data"
+            dirPath: "~/test_data"
             auth:
               username: '{{htw_username}}'
               password: '{{htw_password}}'

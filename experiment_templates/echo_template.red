@@ -29,7 +29,7 @@ execution:
   settings:
     batchConcurrencyLimit: 10000000
     access:
-      url: "https://agency.f4.htw-berlin.de/cctest"
+      url: ""
       auth:
-        username: "{{cc_test_agency_username}}"
-        password: "{{cc_test_agency_password}}"
+        username: ""
+        password: ""
