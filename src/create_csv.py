@@ -1,4 +1,3 @@
-import argparse
 import os
 from collections import defaultdict
 
@@ -6,7 +5,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from experiment_check import get_username_pw
 from experiment_scheduler import EXECUTED_EXPERIMENTS_DIR, AuthenticationInfo
 from show_result import get_state_durations, get_detailed_result_with_cache
 
@@ -117,13 +115,13 @@ def main():
         )
 
     processing_time_df = detailed_results_to_data_frame(detailed_results)
-    succeeded_processing_times_df = processing_time_df[processing_time_df.states == 'succeeded']
 
     success_rate_df = detailed_results_to_success_rate_data_frame(detailed_results)
 
     processing_time_df.to_csv(PROCESSING_DURATION_CSV_PATH)
     success_rate_df.to_csv(SUCCESS_RATE_CSV_PATH)
 
+    # succeeded_processing_times_df = processing_time_df[processing_time_df.states == 'succeeded']
     # plot_data_frames(succeeded_processing_times_df, success_rate_df)
 
     # show_status_information(processing_time_df)
