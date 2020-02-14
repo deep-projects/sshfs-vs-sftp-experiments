@@ -3,3 +3,4 @@ __pycache__
 /cache
 /tmp_file
 /executed_experiments
+/results/processing_times.pdf
