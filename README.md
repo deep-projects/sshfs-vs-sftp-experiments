@@ -52,7 +52,7 @@ To speed up the process the number of experiments can be decreased.
 ```bash
 python3 ./src/experiment_scheduler.py --iterations=2 --batches-per-experiment=10 --number-concurrent-batches=1,5,10
 
-# more information with python3 ./src/experiment_scheduler.py --help
+# python3 ./src/experiment_scheduler.py --help  for more information
 ```
 
 This will start fewer and smaller experiments so that in total 6 GB will be copied.
