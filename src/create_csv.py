@@ -17,8 +17,9 @@ NUM_FAILURES_LABEL = 'number of failures'
 FAIL_PERCENTAGE_LABEL = 'failures in %'
 MOUNT_LABEL = 'transfer method'
 
-PROCESSING_DURATION_CSV_PATH = 'processing_durations.csv'
-SUCCESS_RATE_CSV_PATH = 'success_rate.csv'
+CSVS_PATH = 'results'
+PROCESSING_DURATION_CSV_PATH = os.path.join(CSVS_PATH, 'processing_durations.csv')
+SUCCESS_RATE_CSV_PATH = os.path.join(CSVS_PATH, 'success_rate.csv')
 
 
 def get_arguments():
