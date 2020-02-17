@@ -27,7 +27,7 @@ def get_arguments():
 
 
 def execute_experiment(data):
-    with tempfile.NamedTemporaryFile(mode='w+b') as execution_file:
+    with tempfile.NamedTemporaryFile(mode='w') as execution_file:
         try:
             yaml.dump(data, execution_file)
         except YAMLError:
