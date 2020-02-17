@@ -44,7 +44,7 @@ python3 ./src/experiment_scheduler.py
 ```
 
 In order to execute the experiments the *agency-url* of the agency on which the experiments are to be executed is asked, as well as the *agency-username* and corresponding *agency-password*.
-The *agency-url* should look similar to `https://agency.domain.de/cc`. You can test the *agency-url* be accessing it with you browser. This should return a hello world json object.
+The *agency-url* should look similar to `https://agency.example.de/cc`. You can test the *agency-url* be accessing it with you browser. This should return a hello world json object.
 
 To get access to the SSH server the *ssh-hostname*, the *ssh-username* and *ssh-password* are requested.
 
