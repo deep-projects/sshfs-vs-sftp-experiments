@@ -130,8 +130,8 @@ def main():
     # show_status_information(processing_time_df)
 
 
-def plot_data_frames(duration_data_frame, success_rate_data_frame):
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 4))
+def plot_data_frames(duration_data_frame):
+    fig, ax1 = plt.subplots(1, 1)
 
     sns.set(style="ticks", palette="deep")
     sns.boxplot(
@@ -141,14 +141,6 @@ def plot_data_frames(duration_data_frame, success_rate_data_frame):
         palette='deep',
         data=duration_data_frame,
         ax=ax1
-    )
-    sns.barplot(
-        x=NUM_CONCURRENT_BATCHES_LABEL,
-        y=FAIL_PERCENTAGE_LABEL,
-        hue=MOUNT_LABEL,
-        palette='deep',
-        data=success_rate_data_frame,
-        ax=ax2
     )
     plot_path = os.path.join(RESULTS_PATH, 'processing_times.pdf')
     fig.savefig(plot_path, bibox_inches='tight')

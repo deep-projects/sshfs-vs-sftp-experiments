@@ -6,12 +6,12 @@ from create_csv import PROCESSING_DURATION_CSV_PATH, SUCCESS_RATE_CSV_PATH, plot
 def get_data_frames():
     processing_time_df = pd.read_csv(PROCESSING_DURATION_CSV_PATH, index_col=0)
     successful_processing_time_df = processing_time_df[processing_time_df.states == 'succeeded']
-    return successful_processing_time_df, pd.read_csv(SUCCESS_RATE_CSV_PATH, index_col=0)
+    return successful_processing_time_df
 
 
 def main():
-    duration_data_frame, success_rate_data_frame = get_data_frames()
-    plot_data_frames(duration_data_frame, success_rate_data_frame)
+    duration_data_frame = get_data_frames()
+    plot_data_frames(duration_data_frame)
 
 
 if __name__ == '__main__':
