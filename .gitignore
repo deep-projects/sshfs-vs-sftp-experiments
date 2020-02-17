@@ -4,3 +4,5 @@ __pycache__
 /tmp_file
 /executed_experiments
 /results/processing_times.pdf
+/.venv
+/.vscode
