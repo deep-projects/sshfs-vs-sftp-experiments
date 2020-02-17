@@ -106,7 +106,7 @@ def show_status_information(processing_time_df):
 
 
 def main():
-    agency_auth_info = AuthenticationInfo.from_user_input('agency')
+    agency_auth_info = AuthenticationInfo.agency_from_user_input()
 
     if not os.path.isdir('results'):
         os.mkdir('results')

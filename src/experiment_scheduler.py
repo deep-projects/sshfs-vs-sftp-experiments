@@ -23,10 +23,18 @@ class AuthenticationInfo:
         self.password = password
 
     @staticmethod
-    def from_user_input(prompt_string):
-        hostname = input('{} hostname: '.format(prompt_string))
-        username = input('{} username: '.format(prompt_string))
-        password = getpass('{} password: '.format(prompt_string))
+    def agency_from_user_input():
+        hostname = input('agency url: ')
+        username = input('agency username: ')
+        password = getpass('agency password: ')
+
+        return AuthenticationInfo(hostname, username, password)
+
+    @staticmethod
+    def ssh_from_user_input():
+        hostname = input('ssh server hostname: ')
+        username = input('ssh username: ')
+        password = getpass('ssh password: ')
 
         return AuthenticationInfo(hostname, username, password)
 
@@ -44,8 +52,8 @@ def get_arguments():
     )
     parser.add_argument(
         '--number-concurrent-batches', type=int, nargs='+', default=DEFAULT_BATCH_CONCURRENCY_LIMITS,
-        help='Comma separated list of integers defining different configurations how many batches should be executed '
-             'concurrently'
+        help='List of integers. Every integer defines a new experiment in which this integer is used as the number of '
+             'concurrent batches'
     )
 
     return parser.parse_args()
@@ -54,8 +62,8 @@ def get_arguments():
 def main():
     args = get_arguments()
 
-    agency_auth_info = AuthenticationInfo.from_user_input('agency')
-    ssh_auth_info = AuthenticationInfo.from_user_input('ssh')
+    agency_auth_info = AuthenticationInfo.agency_from_user_input()
+    ssh_auth_info = AuthenticationInfo.ssh_from_user_input()
 
     if not os.path.isdir(EXECUTED_EXPERIMENTS_DIR):
         os.mkdir(EXECUTED_EXPERIMENTS_DIR)
