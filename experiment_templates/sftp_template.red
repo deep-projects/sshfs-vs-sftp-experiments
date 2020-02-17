@@ -34,7 +34,7 @@ container:
   settings:
     image:
       url: 'bruno1996/null_cat_image:latest'
-    ram: 256
+    ram: 2048
 
 execution:
   engine: "ccagency"
