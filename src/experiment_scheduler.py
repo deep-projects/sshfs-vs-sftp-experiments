@@ -10,7 +10,7 @@ from run_experiment import execute_experiment
 
 EXECUTED_EXPERIMENTS_DIR = 'executed_experiments'
 
-DEFAULT_BATCH_CONCURRENCY_LIMITS = [1, 5, 10, 15, 20, 25]
+DEFAULT_BATCH_CONCURRENCY_LIMITS = [5, 10, 15, 20, 25, 30]
 DEFAULT_BATCHES_PER_EXPERIMENT = 100
 DEFAULT_NUM_ITERATIONS = 10
 EXPERIMENT_TEMPLATES = ['sftp_template.red', 'sshfs_template.red']
