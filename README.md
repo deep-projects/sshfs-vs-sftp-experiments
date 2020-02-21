@@ -1,4 +1,4 @@
-# CC-Agency Integration Tests
+# SFTP-vs-SSHFS-Experiments
 
 This repository contains programs that can be used to execute, fetch and evaluate experiments using RED execution engine CC-Agency.
 
