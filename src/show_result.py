@@ -51,7 +51,8 @@ class BatchToStateDuration:
         try:
             return get_state_duration(batch['history'], self.state)
         except ValueError:
-            raise ValueError('Could not find time of state "{}"\nbatch: {}'.format(self.state, batch))
+            return 0
+            # raise ValueError('Could not find time of state "{}"\nbatch: {}'.format(self.state, batch))
 
 
 def get_state_durations(batch_list, state):
