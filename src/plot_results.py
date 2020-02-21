@@ -1,6 +1,6 @@
 import pandas as pd
 
-from create_csv import PROCESSING_DURATION_CSV_PATH, SUCCESS_RATE_CSV_PATH, plot_data_frames
+from create_csv import PROCESSING_DURATION_CSV_PATH, plot_data_frames
 
 
 def get_data_frames():
