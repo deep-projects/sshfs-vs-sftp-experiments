@@ -52,7 +52,6 @@ class BatchToStateDuration:
             return get_state_duration(batch['history'], self.state)
         except ValueError:
             return 0
-            # raise ValueError('Could not find time of state "{}"\nbatch: {}'.format(self.state, batch))
 
 
 def get_state_durations(batch_list, state):
@@ -73,7 +72,7 @@ def get_state_duration(history, state):
 
 
 def get_num_concurrent_batches(agency, experiment_id, username, pw):
-    url = agency + '/experiments/' + experiment_id
+    url = '{}/{}/{}'.format(agency, 'experiments', experiment_id)
     resp = requests.get(url, auth=(username, pw))
 
     return resp.json()['execution']['settings']['batchConcurrencyLimit']
@@ -156,8 +155,9 @@ class BatchFetcher:
         self.experiment_id = experiment_id
 
     def __call__(self, batch):
+        url = '{}/{}/{}'.format(self.agency, 'batches', batch['_id'])
         result = requests.get(
-            os.path.join(self.agency, 'batches', batch['_id']),
+            url,
             auth=(self.username, self.password)
         ).json()
         with self.lock:

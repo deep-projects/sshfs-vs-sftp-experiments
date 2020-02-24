@@ -28,6 +28,9 @@ class AuthenticationInfo:
         username = input('agency username: ')
         password = getpass('agency password: ')
 
+        if hostname.endswith('/'):
+            hostname = hostname[:-1]
+
         return AuthenticationInfo(hostname, username, password)
 
     @staticmethod

@@ -2,7 +2,6 @@
 
 
 import time
-import os.path
 import getpass
 import argparse
 
@@ -49,7 +48,7 @@ def main():
 
 
 def get_batches(agency, username, pw, experiment_id):
-    url = '{}?experimentId={}'.format(os.path.join(agency, 'batches'), experiment_id)
+    url = '{}/{}?experimentId={}'.format(agency, 'batches', experiment_id)
     resp = requests.get(url, auth=(username, pw))
 
     batches = list(filter(lambda b: b['experimentId'] == experiment_id, resp.json()))
